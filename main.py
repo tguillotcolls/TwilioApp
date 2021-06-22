@@ -23,6 +23,7 @@ def sendMessage(text):
         to=personalPhone,
     )
 
+
 def sendImage():
     twilioPhone = '+13236151943'
     personalPhone = '+34608126348'
@@ -38,13 +39,14 @@ def sendImage():
         to=personalPhone,
     )
 
+
 def drawRectangle(faceList, img):
     # Draw rectangle around the faces
     for (x, y, w, h) in faceList:
         cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
     # Display the output
     cv2.imshow('img', img)
-    #todo uncomment when using
+    # todo uncomment when using
     cv2.imwrite('faces/' + getTime() + '.jpg', img)
 
 
@@ -94,7 +96,7 @@ def speakMessage():
     while (msg == None):
         time.sleep(1)
         msg = readClient()
-        if(msg!=None and msg.lower()=="x"):
+        if (msg != None and msg.lower() == "x"):
             print("Speak message canceled")
             return
 
@@ -109,7 +111,7 @@ cap = cv2.VideoCapture(0)
 logFile = open("logs/" + getTime() + ".txt", "w")
 scanOn = True
 time.sleep(5)
-programOn=True
+programOn = True
 while (programOn):
     time.sleep(1)
     if (scanOn):
@@ -121,7 +123,7 @@ while (programOn):
             scanOn = False
     else:
         option = readClient()
-        if option!=None and option.isnumeric():
+        if option != None and option.isnumeric():
             option = int(option)
             if option == 1:
                 sendImage()
