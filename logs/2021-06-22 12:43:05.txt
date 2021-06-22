@@ -1,0 +1,2 @@
+2021-06-22 12:43:11, Faces Detected: 2
+2021-06-22 12:43:29, Message Spoken: STOOOOOP
