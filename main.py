@@ -7,6 +7,9 @@ from twilio.rest import Client
 import cv2
 import gtts
 from playsound import playsound
+from playsound import playsound
+import vlc
+import time
 
 
 def sendMessage(text):
@@ -77,12 +80,28 @@ def readClient():
     else:
         return None
 
+def isRecordingReady():
+    webhook_url = 'https://App-Bootcamp-tguillotcolls.twiliobootcamp.repl.co/getRecordingDone'
+    response = requests.get(webhook_url)
+    text = response.text
+    if text != '-':
+        print("Playing real audio")
+        audioResponse =requests.get(text)
+        with open('audio/clientAudioREAL.mp3', 'wb') as f:
+            f.write(audioResponse.content)
+        f.close()
+        p = vlc.MediaPlayer("audio/clientAudioREAL.mp3")
+        p.play()
+        time.sleep(20)
+        return True
+    else:
+        return False
 
 def scanCamera():
     ret, frame = cap.read()
     rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
     cv2.imshow('frame', rgb)
-    cv2.imwrite('capture.jpg', frame)
+    #cv2.imwrite('capture.jpg', frame)
     print("Scanning...")
 
 
@@ -107,10 +126,32 @@ def speakMessage():
     logFile.write(getTime() + ", Message Spoken: " + msg + "\n")
 
 
+def call():
+    print("Calling!")
+    twilioPhone = '+13236151943'
+    personalPhone = '+34608126348'
+    account_sid = os.environ['TWILIO_ACCOUNT_SID']
+    auth_token = os.environ['TWILIO_AUTH_TOKEN']
+    phoneAnswer='https://App-Bootcamp-tguillotcolls.twiliobootcamp.repl.co/incomingCallMessage'
+    client = Client(account_sid, auth_token)
+
+    call = client.calls.create(
+        #url='http://demo.twilio.com/docs/voice.xml',
+        url=phoneAnswer,
+        from_=twilioPhone,
+        to=personalPhone,
+    )
+    callSID = call.sid
+    while (not isRecordingReady()):
+        print("Waiting for recording...")
+        time.sleep(1)
+    return callSID
+
+#https://replit.com/@twiliobootcamp/App-Bootcamp-tguillotcolls#main.py HERE EXECUTE THIS
 cap = cv2.VideoCapture(0)
 logFile = open("logs/" + getTime() + ".txt", "w")
 scanOn = True
-time.sleep(5)
+time.sleep(1)
 programOn = True
 while (programOn):
     time.sleep(1)
@@ -119,7 +160,7 @@ while (programOn):
         if (detectFace()):
             sendMessage("Intruder detected at: " + getTime())
             time.sleep(1)
-            sendMessage("Options: \n 1: See image \n 2: Broadcast message \n 3: Keep Scanning \n 4: Stop Camera")
+            sendMessage("Options: \n 1: See image \n 2: Text to Voice \n 3: Send voice \n 4: Keep Scanning  \n 5: Stop Camera")
             scanOn = False
     else:
         option = readClient()
@@ -130,9 +171,11 @@ while (programOn):
             elif option == 2:
                 sendMessage("Enter message (x to cancel): ")
                 speakMessage()
-            elif option == 3:
-                scanOn = True
             elif option == 4:
+                scanOn = True
+            elif option ==3:
+                call()
+            elif option == 5:
                 programOn = False
 sendMessage("Bye!")
 logFile.close()
